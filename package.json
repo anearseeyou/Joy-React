@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "description": "",
   "main": "main.js",
-  "dependencies": {},
   "devDependencies": {
     "@babel/core": "^7.12.10",
     "@babel/plugin-transform-react-jsx": "^7.12.12",

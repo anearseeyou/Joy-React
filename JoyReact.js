@@ -1,17 +1,10 @@
-/*
- * @Author: zhengbingyi
- * @Date: 2020-12-27 22:01:25
- * @LastEditors: zhengbingyi
- * @LastEditTime: 2020-12-28 00:26:55
- * @Descripttion: 
- */
-// 定义一个包装element的类
+// element类包装
 class ElementWrapper {
-  constructor(type){
+  constructor(type) {
     this.root = document.createElement(type)
   }
-  setAttribute(name,value){
-    this.root.setAttribute(name,value)
+  setAttribute(name, value){
+    this.root.setAttribute(name, value)
   }
   appendChild(vchild){
     vchild.mountTo(this.root)
@@ -20,32 +13,69 @@ class ElementWrapper {
     parent.appendChild(this.root)
   }
 }
-// 定义一个包装text的类
+// text节点类包装
 class TextWrapper {
-  constructor(content){
+  constructor(content) {
     this.root = document.createTextNode(content)
   }
   mountTo(parent){
     parent.appendChild(this.root)
   }
 }
+// 抽象成类组件
+export class Component {
+  constructor() {
+    this.children = []
+  }
+  setAttribute(name,value){
+    this[name] = value
+  }
+  appendChild(vchild) {
+    this.children.push(vchild)
+  }
+  mountTo(parent){
+    let vdom = this.render()
+    vdom.mountTo(parent)
+  }
+}
 
 export let JoyReact = {
-  createElement(type, attributes, ...children){
-    console.log(arguments)
+  createElement(type, attributes, ...children) {
+    console.log(arguments);
     let element
-    if(typeof type === 'string') element = new ElementWrapper()
-    else element = new type
-    for(let name in attributes){  // attributes 就是传过来的name和id 等属性
-      element.setAttribute(name,attributes[name])
+    if (typeof type === 'string') {
+      element = new ElementWrapper(type)
+    } else {
+      element = new type
     }
-    for(let child of children){  // children 就是传过来的span等元素
-      if(typeof child === 'string') child = new TextWrapper(child)
-      element.appendChild(child)
+    for (let name in attributes) {
+      element.setAttribute(name, attributes[name])
     }
+
+    let insertChildren = (children) => {
+      for (let child of children) {
+
+        if (typeof child === 'object' && child instanceof Array) {
+          insertChildren(child)
+        } else {
+
+          if (!(child instanceof Component)
+            && !(child instanceof ElementWrapper)
+            && !(child instanceof TextWrapper)
+          )
+            child = String(child)
+
+          if (typeof child === 'string')
+            child = new TextWrapper(child)
+
+          element.appendChild(child)
+        }
+      }
+    }
+    insertChildren(children)
     return element
   },
-  render(vdom,element){
+  render(vdom, element) {
     vdom.mountTo(element)
   }
 }
